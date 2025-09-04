@@ -1,0 +1,127 @@
+databaseChangeLog:
+  - changeSet:
+      id: 001-create-roles
+      author: valentyn.opanasiuk
+      changes:
+        - createTable:
+            tableName: roles
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: name
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+                    unique: true
+      rollback:
+        - dropTable:
+            tableName: roles
+            cascadeConstraints: true
+
+  - changeSet:
+      id: 002-create-users
+      author: valentyn.opanasiuk
+      changes:
+        - createTable:
+            tableName: users
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: first_name
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: last_name
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: email
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: password
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: enabled
+                  type: BOOLEAN
+                  defaultValueBoolean: true
+                  constraints:
+                    nullable: false
+      rollback:
+        - dropTable:
+            tableName: users
+            cascadeConstraints: true
+
+  - changeSet:
+      id: 003-create-users-roles
+      author: valentyn.opanasiuk
+      changes:
+        - createTable:
+            tableName: users_roles
+            columns:
+              - column:
+                  name: user_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: role_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+        - addPrimaryKey:
+            tableName: users_roles
+            columnNames: user_id, role_id
+            constraintName: pk_users_roles
+        - addForeignKeyConstraint:
+            baseTableName: users_roles
+            baseColumnNames: user_id
+            referencedTableName: users
+            referencedColumnNames: id
+            constraintName: fk_users_roles_user
+            onDelete: CASCADE
+        - addForeignKeyConstraint:
+            baseTableName: users_roles
+            baseColumnNames: role_id
+            referencedTableName: roles
+            referencedColumnNames: id
+            constraintName: fk_users_roles_role
+            onDelete: CASCADE
+      rollback:
+        - dropTable:
+            tableName: users_roles
+            cascadeConstraints: true
+
+  # Use native Postgres upsert to avoid tricky preConditions array syntax
+  - changeSet:
+      id: 004-seed-roles
+      author: valentyn.opanasiuk
+      changes:
+        - sql:
+            splitStatements: true
+            endDelimiter: ;
+            sql: |
+              INSERT INTO roles (name) VALUES ('ROLE_USER')
+              ON CONFLICT (name) DO NOTHING;
+              INSERT INTO roles (name) VALUES ('ROLE_ADMIN')
+              ON CONFLICT (name) DO NOTHING;
+      rollback:
+        - delete:
+            tableName: roles
+            where: "name in ('ROLE_USER','ROLE_ADMIN')"
