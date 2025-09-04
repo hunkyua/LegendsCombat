@@ -1,4 +1,4 @@
-package com.vo.legendcombat;
+package com.vo.legendscombat;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
