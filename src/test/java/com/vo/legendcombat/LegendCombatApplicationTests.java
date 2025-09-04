@@ -1,0 +1,13 @@
+package com.vo.legendcombat;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+
+@SpringBootTest
+class LegendCombatApplicationTests {
+
+    @Test
+    void contextLoads() {
+    }
+
+}
